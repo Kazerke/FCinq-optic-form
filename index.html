@@ -299,7 +299,7 @@
     </div>
 
     <div class="form-content" id="formContent">
-      <form id="glassesForm" method="POST" action="https://erolp.app.n8n.cloud/webhook/opticien-form" enctype="multipart/form-data">
+      <form id="glassesForm" enctype="multipart/form-data">
         <div class="form-group">
           <label for="glassesFile">
             Télécharger la Monture <span class="required">*</span>
@@ -389,6 +389,7 @@
     const loading = document.getElementById('loading');
     const errorDiv = document.getElementById('error');
     const formContent = document.getElementById('formContent');
+    const WEBHOOK_URL = 'https://erolp.app.n8n.cloud/webhook/opticien-form';
 
     // Fonction pour animer les étapes
     let currentStep = 0;
@@ -405,11 +406,12 @@
       }, 8000);
     }
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
       // Validation du formulaire
       const fileInput = document.getElementById('glassesFile');
       if (!fileInput.files || !fileInput.files[0]) {
-        e.preventDefault();
         errorDiv.textContent = 'Veuillez sélectionner une image de lunettes.';
         errorDiv.classList.add('active');
         return;
@@ -425,7 +427,46 @@
       currentStep = 0;
       animateSteps();
 
-      // Le formulaire se soumettra naturellement sans fetch (pas de CORS!)
+      try {
+        const formData = new FormData(form);
+
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP! statut: ${response.status}`);
+        }
+
+        // Arrêter l'animation
+        clearInterval(stepInterval);
+
+        // Récupérer la réponse JSON de n8n
+        const jsonResponse = await response.json();
+
+        // Extraire le HTML du JSON et remplacer la page
+        if (jsonResponse.html) {
+          document.open();
+          document.write(jsonResponse.html);
+          document.close();
+        } else {
+          throw new Error('Aucun HTML reçu dans la réponse');
+        }
+
+      } catch (error) {
+        console.error('Erreur:', error);
+
+        // Arrêter l'animation
+        clearInterval(stepInterval);
+
+        // Afficher l'erreur
+        formContent.classList.remove('hidden');
+        loading.classList.remove('active');
+        errorDiv.textContent = `Erreur: ${error.message}. Veuillez réessayer.`;
+        errorDiv.classList.add('active');
+        submitBtn.disabled = false;
+      }
     });
 
     // Validation en temps réel du fichier
