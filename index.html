@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créer un Visuel Lunettes - Opticien AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 24px;
+      padding: 48px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.6s ease-out;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .logos {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .logo-image {
+      height: 50px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0.95);
+      transition: transform 0.3s ease;
+    }
+    
+    .logo-image:hover {
+      transform: scale(1.05);
+    }
+    
+    h1 {
+      color: #667eea;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .subtitle {
+      color: #64748b;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    .form-group {
+      margin-bottom: 28px;
+    }
+    
+    label {
+      display: block;
+      color: #1e293b;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+    
+    .required {
+      color: #ef4444;
+    }
+    
+    input[type="file"] {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+    
+    input[type="file"]:hover {
+      border-color: #667eea;
+      background: #f1f5f9;
+    }
+    
+    input[type="file"]:focus {
+      outline: none;
+      border-color: #667eea;
+      border-style: solid;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    select {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      background: white;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      padding-right: 48px;
+    }
+    
+    select:hover {
+      border-color: #cbd5e1;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    .file-hint {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 18px 32px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 40px;
+    }
+    
+    .submit-btn:hover:not(:disabled) {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .submit-btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 32px;
+    }
+    
+    .loading.active {
+      display: block;
+    }
+    
+    .form-content.hidden {
+      display: none;
+    }
+    
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #e2e8f0;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: #667eea;
+      font-weight: 600;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    
+    .loading-subtext {
+      color: #64748b;
+      font-size: 14px;
+    }
+    
+    .progress-steps {
+      margin-top: 24px;
+      text-align: left;
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 12px;
+    }
+    
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      font-size: 14px;
+      color: #64748b;
+    }
+    
+    .step.active {
+      color: #667eea;
+      font-weight: 600;
+    }
+    
+    .step-icon {
+      font-size: 20px;
+    }
+    
+    .error {
+      background: #fee2e2;
+      border: 1px solid #ef4444;
+      color: #991b1b;
+      padding: 16px;
+      border-radius: 12px;
+      margin-top: 20px;
+      display: none;
+      font-size: 14px;
+    }
+    
+    .error.active {
+      display: block;
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 32px 24px;
+      }
+      
+      h1 {
+        font-size: 26px;
+      }
+      
+      .subtitle {
+        font-size: 14px;
+      }
+      
+      .logos {
+        gap: 20px;
+      }
+      
+      .logo-image {
+        height: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logos">
+        <img src="https://drive.google.com/uc?export=download&id=1-rKk8vW11eFJJ25BBwylNvKExBwERzCP" alt="Fcinq" class="logo-image">
+        <img src="https://drive.google.com/uc?export=download&id=1y_o_5FwKA3bvdacts9TN74L2HKKCwGJR" alt="Optic 2000" class="logo-image">
+      </div>
+      <h1>Créer un Visuel Lunettes</h1>
+      <p class="subtitle">Téléchargez votre monture et choisissez comment la mettre en valeur pour les réseaux sociaux</p>
+    </div>
+
+    <div class="form-content" id="formContent">
+      <form id="glassesForm" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="glassesFile">
+            Télécharger la Monture <span class="required">*</span>
+          </label>
+          <input 
+            type="file" 
+            id="glassesFile" 
+            name="Upload Glasses Frame"
+            accept="image/*" 
+            required
+          >
+          <div class="file-hint">
+            📸 Format: JPG, PNG (Max 10MB)
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="showcaseMode">
+            Mode de Présentation <span class="required">*</span>
+          </label>
+          <select id="showcaseMode" name="Showcase Mode" required>
+            <option value="">Sélectionner un mode...</option>
+            <option value="Background Scene">Scène de Fond</option>
+            <option value="Model Replacement">Remplacement sur Mannequin</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="backgroundModel">
+            Sélectionner Fond/Modèle <span class="required">*</span>
+          </label>
+          <select id="backgroundModel" name="Select Background/Model" required>
+            <option value="">Choisir une option...</option>
+            <optgroup label="🌅 Scènes de Fond">
+              <option value="Beach Sunset">Coucher de Soleil sur Plage</option>
+              <option value="Modern Office">Bureau Moderne</option>
+              <option value="Urban Street">Rue Urbaine</option>
+              <option value="Cozy Cafe">Café Cosy</option>
+            </optgroup>
+            <optgroup label="👤 Modèles">
+              <option value="Model - Casual Style">Modèle - Style Décontracté</option>
+              <option value="Model - Professional">Modèle - Professionnel</option>
+              <option value="Model - Sporty">Modèle - Sportif</option>
+              <option value="Model - Elegant">Modèle - Élégant</option>
+              <option value="Model-background">Modèle - Fond</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          Générer le Visuel
+        </button>
+
+        <div class="error" id="error"></div>
+      </form>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p class="loading-text">Création de votre visuel en cours...</p>
+      <p class="loading-subtext">Cela peut prendre 30 à 60 secondes</p>
+      
+      <div class="progress-steps">
+        <div class="step active" id="step1">
+          <span class="step-icon">⏳</span>
+          <span>Traitement de l'image...</span>
+        </div>
+        <div class="step" id="step2">
+          <span class="step-icon">🎨</span>
+          <span>Génération IA en cours...</span>
+        </div>
+        <div class="step" id="step3">
+          <span class="step-icon">📝</span>
+          <span>Création du caption...</span>
+        </div>
+        <div class="step" id="step4">
+          <span class="step-icon">✅</span>
+          <span>Finalisation...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('glassesForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loading = document.getElementById('loading');
+    const errorDiv = document.getElementById('error');
+    const formContent = document.getElementById('formContent');
+
+    // IMPORTANT: Remplacez par l'URL de votre webhook n8n
+    // Allez dans n8n, ouvrez le workflow, cliquez sur "Webhook Trigger"
+    // Copiez l'URL "Production URL" qui apparaît
+    const WEBHOOK_URL = 'VOTRE_URL_WEBHOOK_ICI';
+
+    // Fonction pour animer les étapes
+    let currentStep = 0;
+    let stepInterval;
+
+    function animateSteps() {
+      const steps = ['step1', 'step2', 'step3', 'step4'];
+      
+      stepInterval = setInterval(() => {
+        if (currentStep < steps.length) {
+          document.getElementById(steps[currentStep]).classList.add('active');
+          currentStep++;
+        }
+      }, 8000);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      // Validation du formulaire
+      const fileInput = document.getElementById('glassesFile');
+      if (!fileInput.files || !fileInput.files[0]) {
+        errorDiv.textContent = 'Veuillez sélectionner une image de lunettes.';
+        errorDiv.classList.add('active');
+        return;
+      }
+
+      // Masquer l'erreur et afficher le chargement
+      errorDiv.classList.remove('active');
+      formContent.classList.add('hidden');
+      loading.classList.add('active');
+      submitBtn.disabled = true;
+      
+      // Démarrer l'animation des étapes
+      currentStep = 0;
+      animateSteps();
+
+      try {
+        const formData = new FormData(form);
+        
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP! statut: ${response.status}`);
+        }
+
+        // Arrêter l'animation
+        clearInterval(stepInterval);
+        
+        // Récupérer la réponse HTML de n8n
+        const htmlResponse = await response.text();
+        
+        // Remplacer toute la page par le résultat
+        document.open();
+        document.write(htmlResponse);
+        document.close();
+
+      } catch (error) {
+        console.error('Erreur:', error);
+        
+        // Arrêter l'animation
+        clearInterval(stepInterval);
+        
+        // Afficher l'erreur
+        formContent.classList.remove('hidden');
+        loading.classList.remove('active');
+        errorDiv.textContent = `Erreur: ${error.message}. Veuillez réessayer.`;
+        errorDiv.classList.add('active');
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Validation en temps réel du fichier
+    document.getElementById('glassesFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 10 * 1024 * 1024) {
+          errorDiv.textContent = 'Le fichier est trop volumineux (max 10MB).';
+          errorDiv.classList.add('active');
+          this.value = '';
+        } else {
+          errorDiv.classList.remove('active');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
