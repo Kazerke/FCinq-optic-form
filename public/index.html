@@ -264,25 +264,112 @@
       display: block;
     }
     
+    .thumbnail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .thumbnail-option {
+      position: relative;
+      border: 3px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .thumbnail-option:hover {
+      border-color: #667eea;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+    }
+
+    .thumbnail-option.selected {
+      border-color: #667eea;
+      border-width: 4px;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    }
+
+    .thumbnail-option img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .thumbnail-label {
+      padding: 12px 10px;
+      background: white;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1e293b;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .thumbnail-option.selected .thumbnail-label {
+      background: #667eea;
+      color: white;
+    }
+
+    .thumbnail-option::after {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      background: #667eea;
+      color: white;
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .thumbnail-option.selected::after {
+      display: flex;
+    }
+
     @media (max-width: 640px) {
       .container {
         padding: 32px 24px;
       }
-      
+
       h1 {
         font-size: 26px;
       }
-      
+
       .subtitle {
         font-size: 14px;
       }
-      
+
       .logos {
         gap: 20px;
       }
-      
+
       .logo-image {
         height: 40px;
+      }
+
+      .thumbnail-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .thumbnail-option img {
+        height: 120px;
+      }
+
+      .thumbnail-label {
+        font-size: 12px;
+        padding: 10px 8px;
       }
     }
   </style>
@@ -291,8 +378,8 @@
   <div class="container">
     <div class="header">
       <div class="logos">
-        <img src="https://drive.google.com/thumbnail?id=1-rKk8vW11eFJJ25BBwylNvKExBwERzCP&sz=w500" alt="Fcinq" class="logo-image">
-        <img src="https://drive.google.com/thumbnail?id=1y_o_5FwKA3bvdacts9TN74L2HKKCwGJR&sz=w500" alt="Optic 2000" class="logo-image">
+        <img src="/images/logos/fcinq.png" alt="Fcinq" class="logo-image">
+        <img src="/images/logos/optic2000.png" alt="Optic 2000" class="logo-image">
       </div>
       <h1>Créer un Visuel Lunettes</h1>
       <p class="subtitle">Téléchargez votre monture et choisissez comment la mettre en valeur pour les réseaux sociaux</p>
@@ -327,26 +414,57 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="backgroundModel">
-            Sélectionner Fond/Modèle <span class="required">*</span>
+        <div class="form-group" id="backgroundModelGroup" style="display: none;">
+          <label>
+            Sélectionner Fond <span class="required">*</span>
           </label>
-          <select id="backgroundModel" name="Select Background/Model" required>
-            <option value="">Choisir une option...</option>
-            <optgroup label="🌅 Scènes de Fond">
-              <option value="Beach Sunset">Coucher de Soleil sur Plage</option>
-              <option value="Modern Office">Bureau Moderne</option>
-              <option value="Urban Street">Rue Urbaine</option>
-              <option value="Cozy Cafe">Café Cosy</option>
-            </optgroup>
-            <optgroup label="👤 Modèles">
-              <option value="Model - Casual Style">Modèle - Style Décontracté</option>
-              <option value="Model - Professional">Modèle - Professionnel</option>
-              <option value="Model - Sporty">Modèle - Sportif</option>
-              <option value="Model - Elegant">Modèle - Élégant</option>
-              <option value="Model-background">Modèle - Fond</option>
-            </optgroup>
-          </select>
+          <div class="thumbnail-grid" id="backgroundGrid">
+            <div class="thumbnail-option" data-value="Beach Sunset">
+              <img src="/images/backgrounds/beach-sunset.jpg" alt="Beach Sunset">
+              <div class="thumbnail-label">Coucher de Soleil sur Plage</div>
+            </div>
+            <div class="thumbnail-option" data-value="Modern Office">
+              <img src="/images/backgrounds/modern-office.jpg" alt="Modern Office">
+              <div class="thumbnail-label">Bureau Moderne</div>
+            </div>
+            <div class="thumbnail-option" data-value="Urban Street">
+              <img src="/images/backgrounds/urban-street.jpg" alt="Urban Street">
+              <div class="thumbnail-label">Rue Urbaine</div>
+            </div>
+            <div class="thumbnail-option" data-value="Cozy Cafe">
+              <img src="/images/backgrounds/cozy-cafe.jpg" alt="Cozy Cafe">
+              <div class="thumbnail-label">Café Cosy</div>
+            </div>
+          </div>
+          <input type="hidden" id="backgroundModel" name="Select Background/Model" required>
+        </div>
+
+        <div class="form-group" id="modelGroup" style="display: none;">
+          <label>
+            Sélectionner Modèle <span class="required">*</span>
+          </label>
+          <div class="thumbnail-grid" id="modelGrid">
+            <div class="thumbnail-option" data-value="Model - Casual Style">
+              <img src="/images/models/casual-style.jpg" alt="Casual Style">
+              <div class="thumbnail-label">Style Décontracté</div>
+            </div>
+            <div class="thumbnail-option" data-value="Model - Professional">
+              <img src="/images/models/professional.jpg" alt="Professional">
+              <div class="thumbnail-label">Professionnel</div>
+            </div>
+            <div class="thumbnail-option" data-value="Model - Sporty">
+              <img src="/images/models/sporty.jpg" alt="Sporty">
+              <div class="thumbnail-label">Sportif</div>
+            </div>
+            <div class="thumbnail-option" data-value="Model - Elegant">
+              <img src="/images/models/elegant.jpg" alt="Elegant">
+              <div class="thumbnail-label">Élégant</div>
+            </div>
+            <div class="thumbnail-option" data-value="Model-background">
+              <img src="/images/models/model-background.jpg" alt="Background Model">
+              <div class="thumbnail-label">Modèle - Fond</div>
+            </div>
+          </div>
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtn">
@@ -390,7 +508,6 @@
     const errorDiv = document.getElementById('error');
     const formContent = document.getElementById('formContent');
     const WEBHOOK_URL = 'https://erolp.app.n8n.cloud/webhook/opticien-form';
-
 
     let currentStep = 0;
     let stepInterval;
@@ -481,6 +598,43 @@
           errorDiv.classList.remove('active');
         }
       }
+    });
+
+    const showcaseMode = document.getElementById('showcaseMode');
+    const backgroundModelGroup = document.getElementById('backgroundModelGroup');
+    const modelGroup = document.getElementById('modelGroup');
+    const backgroundModelInput = document.getElementById('backgroundModel');
+
+    showcaseMode.addEventListener('change', function() {
+      const selectedMode = this.value;
+
+      backgroundModelGroup.style.display = 'none';
+      modelGroup.style.display = 'none';
+      backgroundModelInput.value = '';
+
+      document.querySelectorAll('.thumbnail-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+
+      if (selectedMode === 'Background Scene') {
+        backgroundModelGroup.style.display = 'block';
+      } else if (selectedMode === 'Model Replacement') {
+        modelGroup.style.display = 'block';
+      }
+    });
+
+    document.querySelectorAll('.thumbnail-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const grid = this.closest('.thumbnail-grid');
+        grid.querySelectorAll('.thumbnail-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+
+        this.classList.add('selected');
+
+        const value = this.getAttribute('data-value');
+        backgroundModelInput.value = value;
+      });
     });
   </script>
 </body>
