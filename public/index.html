@@ -398,8 +398,8 @@
             accept="image/*" 
             required
           >
-          <div class="file-hint">
-            📸 Format: JPG, PNG (Max 10MB)
+          <div class="file-hint" id="fileHint">
+            📸 <span id="fileHintText">Échantillon chargé - cliquez pour changer</span>
           </div>
         </div>
 
@@ -439,10 +439,6 @@
               <img src="/images/backgrounds/Fond-Montagne.jpg" alt="Montagne">
               <div class="thumbnail-label">Montagne</div>
             </div>
-            <div class="thumbnail-option" data-value="BorddeMer">
-              <img src="/images/backgrounds/Fond-BorddeMer.jpg" alt="BorddeMer">
-              <div class="thumbnail-label">Bord de Mer</div>
-            </div>
           </div>
           <input type="hidden" id="backgroundModel" name="Select Background/Model" required>
         </div>
@@ -460,17 +456,9 @@
               <img src="/images/models/professional.jpg" alt="Professional">
               <div class="thumbnail-label">Professionnel</div>
             </div>
-            <div class="thumbnail-option" data-value="Model - Sporty">
-              <img src="/images/models/sporty.jpg" alt="Sporty">
-              <div class="thumbnail-label">Sportif</div>
-            </div>
             <div class="thumbnail-option" data-value="Model - Elegant">
               <img src="/images/models/elegant.jpg" alt="Elegant">
               <div class="thumbnail-label">Élégant</div>
-            </div>
-            <div class="thumbnail-option" data-value="Model-background">
-              <img src="/images/models/model-background.jpg" alt="Background Model">
-              <div class="thumbnail-label">Modèle - Fond</div>
             </div>
           </div>
         </div>
@@ -519,6 +507,32 @@
 
     let currentStep = 0;
     let stepInterval;
+    let sampleImageLoaded = false;
+
+    // Pre-load sample glasses image on page load
+    async function loadSampleImage() {
+      const fileInput = document.getElementById('glassesFile');
+      const fileHintText = document.getElementById('fileHintText');
+
+      try {
+        const response = await fetch('/images/backgrounds/sample-glasses.png');
+        const blob = await response.blob();
+        const file = new File([blob], 'sample-glasses.png', { type: 'image/png' });
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        fileInput.files = dataTransfer.files;
+
+        sampleImageLoaded = true;
+        fileHintText.textContent = 'Échantillon chargé - cliquez pour changer';
+      } catch (error) {
+        console.error('Error loading sample image:', error);
+        fileHintText.textContent = 'Format: JPG, PNG (Max 10MB)';
+      }
+    }
+
+    // Load sample image when page loads
+    window.addEventListener('DOMContentLoaded', loadSampleImage);
 
     function animateSteps() {
       const steps = ['step1', 'step2', 'step3', 'step4'];
@@ -597,13 +611,24 @@
 
     document.getElementById('glassesFile').addEventListener('change', function(e) {
       const file = e.target.files[0];
+      const fileHintText = document.getElementById('fileHintText');
+
       if (file) {
         if (file.size > 10 * 1024 * 1024) {
           errorDiv.textContent = 'Le fichier est trop volumineux (max 10MB).';
           errorDiv.classList.add('active');
           this.value = '';
+          // Reload sample if user's file was rejected
+          if (sampleImageLoaded) {
+            fileHintText.textContent = 'Échantillon chargé - cliquez pour changer';
+          }
         } else {
           errorDiv.classList.remove('active');
+          // Update hint to show user's file is loaded
+          if (file.name !== 'sample-glasses.png') {
+            fileHintText.textContent = `${file.name} - cliquez pour changer`;
+            sampleImageLoaded = false;
+          }
         }
       }
     });
