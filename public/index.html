@@ -156,6 +156,60 @@
       align-items: center;
       gap: 6px;
     }
+
+    .image-preview {
+      margin-top: 16px;
+      display: none;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .image-preview.active {
+      display: flex;
+    }
+
+    .preview-thumbnail {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      object-fit: contain;
+      background: white;
+      border: 2px solid #e2e8f0;
+      padding: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .preview-thumbnail:hover {
+      transform: scale(1.8);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+      border-color: #667eea;
+      z-index: 1000;
+    }
+
+    .preview-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .preview-filename {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 14px;
+    }
+
+    .preview-description {
+      font-size: 13px;
+      color: #64748b;
+    }
     
     .submit-btn {
       width: 100%;
@@ -371,6 +425,16 @@
         font-size: 12px;
         padding: 10px 8px;
       }
+
+      .image-preview {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .preview-thumbnail {
+        width: 100%;
+        max-width: 200px;
+      }
     }
   </style>
 </head>
@@ -391,15 +455,22 @@
           <label for="glassesFile">
             Télécharger la Monture <span class="required">*</span>
           </label>
-          <input 
-            type="file" 
-            id="glassesFile" 
+          <input
+            type="file"
+            id="glassesFile"
             name="Upload Glasses Frame"
-            accept="image/*" 
+            accept="image/*"
             required
           >
           <div class="file-hint" id="fileHint">
             📸 <span id="fileHintText">Échantillon chargé - cliquez pour changer</span>
+          </div>
+          <div class="image-preview" id="imagePreview">
+            <img id="previewThumbnail" class="preview-thumbnail" alt="Aperçu de la monture">
+            <div class="preview-info">
+              <div class="preview-filename" id="previewFilename">sample-glasses.png</div>
+              <div class="preview-description">Image de la monture qui sera utilisée pour générer le visuel</div>
+            </div>
           </div>
         </div>
 
@@ -513,6 +584,9 @@
     async function loadSampleImage() {
       const fileInput = document.getElementById('glassesFile');
       const fileHintText = document.getElementById('fileHintText');
+      const imagePreview = document.getElementById('imagePreview');
+      const previewThumbnail = document.getElementById('previewThumbnail');
+      const previewFilename = document.getElementById('previewFilename');
 
       try {
         const response = await fetch('/images/backgrounds/sample-glasses.png');
@@ -522,6 +596,11 @@
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         fileInput.files = dataTransfer.files;
+
+        // Show preview
+        previewThumbnail.src = URL.createObjectURL(blob);
+        previewFilename.textContent = 'sample-glasses.png';
+        imagePreview.classList.add('active');
 
         sampleImageLoaded = true;
         fileHintText.textContent = 'Échantillon chargé - cliquez pour changer';
@@ -533,6 +612,7 @@
 
     // Load sample image when page loads
     window.addEventListener('DOMContentLoaded', loadSampleImage);
+
 
     function animateSteps() {
       const steps = ['step1', 'step2', 'step3', 'step4'];
@@ -612,6 +692,9 @@
     document.getElementById('glassesFile').addEventListener('change', function(e) {
       const file = e.target.files[0];
       const fileHintText = document.getElementById('fileHintText');
+      const imagePreview = document.getElementById('imagePreview');
+      const previewThumbnail = document.getElementById('previewThumbnail');
+      const previewFilename = document.getElementById('previewFilename');
 
       if (file) {
         if (file.size > 10 * 1024 * 1024) {
@@ -624,6 +707,16 @@
           }
         } else {
           errorDiv.classList.remove('active');
+
+          // Update preview with new image
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            previewThumbnail.src = event.target.result;
+            previewFilename.textContent = file.name;
+            imagePreview.classList.add('active');
+          };
+          reader.readAsDataURL(file);
+
           // Update hint to show user's file is loaded
           if (file.name !== 'sample-glasses.png') {
             fileHintText.textContent = `${file.name} - cliquez pour changer`;
